@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import EXIF from 'exif-js';
 import './EcoUploadsPage.css';
 

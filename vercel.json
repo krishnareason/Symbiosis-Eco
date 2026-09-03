@@ -2,23 +2,25 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/server.js",
-      "use": "@vercel/node"
+      "src": "backend/main.py",
+      "use": "@vercel/python"
     },
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "installCommand": "npm install", "buildCommand": "npm run build", "outputDirectory": "build" }
+      "config": {
+        "distDir": "build"
+      }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/server.js"
+      "source": "/api/(.*)",
+      "destination": "/backend/main.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "source": "/(.*)",
+      "destination": "/frontend/index.html"
     }
   ]
 }

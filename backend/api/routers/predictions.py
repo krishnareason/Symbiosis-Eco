@@ -1,8 +1,9 @@
-from fastapi import APIRouter
+from ninja import Router
+from typing import List
+from ..schemas import PredictionOut
 
-router = APIRouter()
+router = Router()
 
-# Mock data for predictions
 mock_predictions = {
     "deforestation": [
         {"id": "pred-d1", "lat": 21.0, "lng": 79.0, "type": "predicted_deforestation", "title": "Predicted Deforestation High Risk"}
@@ -15,14 +16,14 @@ mock_predictions = {
     ]
 }
 
-@router.get("/deforestation")
-async def get_deforestation_predictions():
+@router.get("/deforestation", response=List[PredictionOut])
+def get_deforestation_predictions(request):
     return mock_predictions["deforestation"]
 
-@router.get("/plastic")
-async def get_plastic_predictions():
+@router.get("/plastic", response=List[PredictionOut])
+def get_plastic_predictions(request):
     return mock_predictions["plastic"]
 
-@router.get("/coral")
-async def get_coral_predictions():
+@router.get("/coral", response=List[PredictionOut])
+def get_coral_predictions(request):
     return mock_predictions["coral"]

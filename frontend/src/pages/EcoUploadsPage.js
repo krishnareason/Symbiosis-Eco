@@ -42,12 +42,13 @@ const UploaderAndCapture = () => {
         }
     }, [stream]);
 
-    const uploadToBackend = async (file, dataPayload) => {
+    const uploadToBackend = async (file, dataPayload, setProgressMessage) => {
         const formData = new FormData();
         formData.append("file", file, file.name || "live_capture.jpg");
         formData.append("lat", dataPayload.lat);
         formData.append("lon", dataPayload.lng);
 
+        if (setProgressMessage) setProgressMessage("Uploading image...");
         const res = await fetch("http://localhost:8000/api/threats/upload", { 
             method: 'POST', 
             body: formData 
@@ -59,9 +60,26 @@ const UploaderAndCapture = () => {
             throw new Error(data.detail || "Upload failed.");
         }
         
-        if (data.status === "rejected") {
-            throw new Error(data.message);
+        if (data.status === "processing" && data.data && data.data.threat_id) {
+            if (setProgressMessage) setProgressMessage("Image uploaded. Waiting for Gemini AI verification (~10 secs)...");
+            const threatId = data.data.threat_id;
+            
+            for (let i = 0; i < 15; i++) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const statusRes = await fetch(`http://localhost:8000/api/threats/${threatId}`);
+                if (statusRes.ok) {
+                    const statusData = await statusRes.json();
+                    if (statusData.status === 'verified') {
+                        return `Verified as: ${statusData.title}! It will now appear on the map.`;
+                    } else if (statusData.status === 'rejected') {
+                        throw new Error("Gemini AI rejected the image. No environmental threat detected.");
+                    }
+                }
+            }
+            throw new Error("AI verification timed out.");
         }
+        
+        return "Submitted successfully!";
     };
 
     const handleLiveCapture = async () => {
@@ -78,11 +96,11 @@ const UploaderAndCapture = () => {
             const imageDataUrl = canvasRef.current.toDataURL('image/jpeg');
             const blob = await (await fetch(imageDataUrl)).blob();
             
-            await uploadToBackend(blob, {
+            const successMsg = await uploadToBackend(blob, {
                 lat: userCoords.latitude,
                 lng: userCoords.longitude
-            });
-            setMessage("Live capture submitted and validated successfully!");
+            }, setMessage);
+            setMessage(successMsg);
         } catch (err) {
             setError(err.message || "Live capture failed.");
         } finally {
@@ -129,11 +147,11 @@ const UploaderAndCapture = () => {
                 throw new Error("Could not parse GPS coordinates from the image file. The format may be unsupported.");
             }
 
-            await uploadToBackend(file, {
+            const successMsg = await uploadToBackend(file, {
                 lat: imageCoords.latitude,
                 lng: imageCoords.longitude
-            });
-            setMessage("Geotagged image validated and submitted successfully!");
+            }, setMessage);
+            setMessage(successMsg);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -157,11 +175,11 @@ const UploaderAndCapture = () => {
             const dummyDataUrl = dummyCanvas.toDataURL('image/jpeg');
             const blob = await (await fetch(dummyDataUrl)).blob();
             
-            await uploadToBackend(blob, {
+            const successMsg = await uploadToBackend(blob, {
                 lat: parseFloat(lat.value),
                 lng: parseFloat(lng.value)
-            });
-            setMessage("Developer data submitted successfully!");
+            }, setMessage);
+            setMessage(successMsg);
             e.target.reset();
         } catch (err) {
             setError(err.message);

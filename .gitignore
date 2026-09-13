@@ -3,9 +3,15 @@ node_modules/
 backend/venv/
 venv/
 env/
+# Environment variables
 .env
 .env.*
 !.env.example
+.envTemp
+
+# Django
+db.sqlite3
+media/
 
 # Logs and outputs
 npm-debug.log*

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import EXIF from 'exif-js';
 import './EcoUploadsPage.css';
+import { API_BASE_URL } from '../apiConfig';
 
 // --- MAIN PAGE COMPONENT ---
 export default function EcoUploadsPage() {
@@ -49,7 +50,7 @@ const UploaderAndCapture = () => {
         formData.append("lon", dataPayload.lng);
 
         if (setProgressMessage) setProgressMessage("Uploading image...");
-        const res = await fetch("http://localhost:8000/api/threats/upload", { 
+        const res = await fetch(`${API_BASE_URL}/threats/upload`, { 
             method: 'POST', 
             body: formData 
         });
@@ -66,7 +67,7 @@ const UploaderAndCapture = () => {
             
             for (let i = 0; i < 15; i++) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                const statusRes = await fetch(`http://localhost:8000/api/threats/${threatId}`);
+                const statusRes = await fetch(`${API_BASE_URL}/threats/${threatId}`);
                 if (statusRes.ok) {
                     const statusData = await statusRes.json();
                     if (statusData.status === 'verified') {

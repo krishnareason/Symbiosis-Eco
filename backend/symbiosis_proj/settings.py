@@ -96,6 +96,10 @@ CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localho
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
+# Prevent infinite hanging if Redis URL is misconfigured
+broker_transport_options = {'max_retries': 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
+CELERY_BROKER_CONNECTION_TIMEOUT = 3
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

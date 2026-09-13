@@ -27,8 +27,15 @@ def upload_threat(request, lat: float = Form(...), lon: float = Form(...), file:
         status='pending'
     )
 
-    # Dispatch to Celery
-    analyze_threat_image.delay(threat.id, temp_path)
+    # Dispatch to Celery gracefully
+    try:
+        analyze_threat_image.delay(threat.id, temp_path)
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Failed to send image to AI queue: {str(e)}",
+            "data": None
+        }
 
     return {
         "status": "processing",

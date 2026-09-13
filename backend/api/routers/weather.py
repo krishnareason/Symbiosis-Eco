@@ -13,7 +13,7 @@ def get_weather(request, lat: float, lon: float):
 
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:

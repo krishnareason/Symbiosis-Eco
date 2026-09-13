@@ -4,6 +4,6 @@ python manage.py migrate
 # Collect static files for Django Admin
 python manage.py collectstatic --noinput
 # Start the Celery worker in the background
-celery -A symbiosis_proj worker -l info &
+celery -A symbiosis_proj worker -l info --concurrency=1 &
 # Start the Gunicorn web server in the foreground
 gunicorn symbiosis_proj.wsgi:application --bind 0.0.0.0:${PORT:-8000} --threads 4

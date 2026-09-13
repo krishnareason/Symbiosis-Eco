@@ -2,10 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/main.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -16,7 +12,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/main.py"
+      "destination": "https://symbiosis-eco.onrender.com/api/$1"
     },
     {
       "source": "/static/(.*)",
